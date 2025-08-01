@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+
+    /* Sidebar variables */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 0 0% 10.2%; /* Equivalente a #1a1a1a */
+    --foreground: 210 40% 98%;
+    --card: 0 0% 10.2%;
+    --card-foreground: 210 40% 98%;
+    --popover: 0 0% 10.2%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+
+    /* Sidebar variables for dark theme */
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 0 0% 98%;
+    --sidebar-primary-foreground: 240 5.9% 10%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+body {
+  @apply bg-amity-dark text-amity-text;
+  min-height: 100vh;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-amity-gray;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-amity-gold rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-amity-gold-dark;
+}
+
+/* Smooth animations */
+* {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Gold gradient text */
+.gold-gradient-text {
+  background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Professional card styling */
+.professional-card {
+  @apply bg-amity-gray border border-amity-gray-light rounded-xl shadow-lg hover:shadow-xl;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.professional-card:hover {
+  @apply border-amity-gold/30 shadow-amity-gold/10;
+  transform: translateY(-2px);
+}
+
+/* Button styles */
+.btn-gold {
+  @apply bg-gradient-to-r from-amity-gold to-amity-gold-light text-amity-dark font-semibold px-6 py-3 rounded-lg;
+  @apply hover:from-amity-gold-dark hover:to-amity-gold shadow-lg hover:shadow-xl;
+  transition: all 0.3s ease;
+}
+
+.btn-gold:hover {
+  transform: translateY(-1px);
+}
+
+.btn-outline-gold {
+  @apply border-2 border-amity-gold text-amity-gold font-semibold px-6 py-3 rounded-lg;
+  @apply hover:bg-amity-gold hover:text-amity-dark;
+  transition: all 0.3s ease;
+}
+
+/* Estilos para el editor de texto */
+.document-editor-textarea {
+  font-family: "Times New Roman", serif;
+  line-height: 1.8;
+}
+
+.document-editor-textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #d4af37;
+}
+
+/* Estilos para el contenido del documento */
+.document-content {
+  font-family: "Times New Roman", serif;
+  line-height: 1.8;
+  color: #333;
+  white-space: pre-wrap;
+}
+
+.document-content h1,
+.document-content h2,
+.document-content h3 {
+  color: #d4af37;
+  margin-bottom: 15px;
+}
+
+.document-content p {
+  margin-bottom: 15px;
+  text-align: justify;
+}
+
+/* Estilos para la barra de herramientas */
+.toolbar-button {
+  transition: all 0.2s ease;
+}
+
+.toolbar-button:hover {
+  background-color: rgba(212, 175, 55, 0.2);
+  color: #d4af37;
+}
