@@ -13,17 +13,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Scale, Eye, EyeOff } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 
-const ROLES = ["Admin", "Usuario"] as const
-const PROFILES = ["Emprendedor", "Abogado", "Contador", "Otro"] as const
+const PLANES = ["Básico", "Intermedio", "Avanzado"] as const
+const PROFILES = ["Gerente", "Abogado", "Asistente"] as const
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    role: "Usuario" as (typeof ROLES)[number],
-    profile: "Emprendedor" as (typeof PROFILES)[number],
+    plan: "Intermedio" as (typeof PLANES)[number],
+    profile: "Abogado" as (typeof PROFILES)[number],
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -40,7 +41,9 @@ export default function RegisterPage() {
     setError("")
 
     // Validaciones
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword ||
+        !formData.plan || !formData.profile
+    ) {
       setError("Por favor, completa todos los campos")
       return
     }
@@ -56,12 +59,15 @@ export default function RegisterPage() {
     }
 
     const success = await register({
-      name: formData.name,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
       email: formData.email,
       password: formData.password,
-      role: formData.role,
+      plan: formData.plan,
       profile: formData.profile,
     })
+    console.log("success")
+    console.log(success)
 
     if (success) {
       router.push("/dashboard") // Cambiar de "/" a "/dashboard"
@@ -87,14 +93,28 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-amity-text font-medium">
-                Nombre Completo
+                Nombre
               </Label>
               <Input
                 id="name"
                 type="text"
-                value={formData.name}
-                onChange={(e) => handleChange("name", e.target.value)}
-                placeholder="Tu nombre completo"
+                value={formData.firstName}
+                onChange={(e) => handleChange("firstName", e.target.value)}
+                placeholder="Tus nombres"
+                className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
+                disabled={isLoading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastname" className="text-amity-text font-medium">
+                Apellido
+              </Label>
+              <Input
+                id="lastname"
+                type="text"
+                value={formData.lastName}
+                onChange={(e) => handleChange("lastName", e.target.value)}
+                placeholder="Tus apellidos"
                 className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
                 disabled={isLoading}
               />
@@ -117,17 +137,17 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="role" className="text-amity-text font-medium">
-                  Rol
+                <Label htmlFor="plan" className="text-amity-text font-medium">
+                  Plan
                 </Label>
-                <Select value={formData.role} onValueChange={(value) => handleChange("role", value)}>
+                <Select value={formData.plan} onValueChange={(value) => handleChange("plan", value)}>
                   <SelectTrigger className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text focus:ring-amity-gold">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-amity-gray border border-amity-gray-light/50 text-amity-text">
-                    {ROLES.map((role) => (
-                      <SelectItem key={role} value={role} className="hover:bg-amity-gold/20">
-                        {role}
+                    {PLANES.map((plan) => (
+                      <SelectItem key={plan} value={plan} className="hover:bg-amity-gold/20">
+                        {plan}
                       </SelectItem>
                     ))}
                   </SelectContent>

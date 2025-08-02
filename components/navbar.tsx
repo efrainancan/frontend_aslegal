@@ -10,13 +10,16 @@ import { CreateCaseWizard } from "./create-case-wizard"
 import { useState } from "react"
 import { useSidebar } from "@/components/ui/sidebar"
 import { useAuth } from "@/contexts/auth-context"
+import { useRouter } from "next/navigation"
 
 export function Navbar() {
   const [isCaseDialogOrSheetOpen, setIsCaseDialogOrSheetOpen] = useState(false)
   const { open, setOpen } = useSidebar()
   const { user, logout } = useAuth()
+  const router = useRouter()
 
   const handleLogout = () => {
+    router.push("/") // Cambiar de "/" a "/dashboard"
     logout()
   }
 
@@ -70,7 +73,7 @@ export function Navbar() {
             className="text-amity-text hover:text-amity-gold font-medium transition-colors duration-200 relative group"
             prefetch={false}
           >
-            Escritos
+            Documentos
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-amity-gold transition-all duration-200 group-hover:w-full"></span>
           </Link>
           <Link
@@ -104,7 +107,7 @@ export function Navbar() {
                   <User className="h-4 w-4 text-amity-dark" />
                 </div>
                 <div className="hidden md:flex flex-col items-start">
-                  <span className="text-sm font-medium">{user?.name}</span>
+                  <span className="text-sm font-medium">{user?.firstName + " " + user?.lastName}</span>
                   <span className="text-xs text-amity-text-muted">{user?.profile}</span>
                 </div>
               </Button>

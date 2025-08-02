@@ -36,7 +36,7 @@ const navItems = [
     icon: Briefcase,
   },
   {
-    title: "Escritos",
+    title: "Documentos",
     url: "/documents",
     icon: FileText,
   },
@@ -158,7 +158,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <User2 className="h-4 w-4 text-amity-dark" />
                     </div>
                     <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-                      <span className="text-sm font-medium">{user?.name || "Usuario"}</span>
+                      <span className="text-sm font-medium">{user?.firstName || "Usuario"}</span>
                       <span className="text-xs text-amity-text-muted">{user?.email || "usuario@email.com"}</span>
                     </div>
                   </div>

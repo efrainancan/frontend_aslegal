@@ -39,6 +39,7 @@ export default function DocumentsPage() {
     },
   ]
 
+
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-4xl font-bold text-white mb-4">Módulo de Escritos</h1>
@@ -103,7 +104,7 @@ export default function DocumentsPage() {
         {/* Botón para escritorio (abre Dialog) */}
         <Dialog open={isDocumentDialogOrSheetOpen} onOpenChange={setIsDocumentDialogOrSheetOpen}>
           <DialogTrigger asChild>
-            <Button className="mt-6 hidden md:flex w-full bg-gradient-to-r from-aslegal-neon-blue to-aslegal-neon-purple text-white font-bold rounded-lg shadow-lg hover:shadow-aslegal-neon-blue/50 transition-all duration-300">
+            <Button className="hidden lg:inline-flex btn-gold mt-3">
               <Plus className="mr-2 h-4 w-4" /> Generar Nuevo Documento
             </Button>
           </DialogTrigger>

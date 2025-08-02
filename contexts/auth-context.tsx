@@ -4,10 +4,11 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from "
 
 interface User {
   id: string
-  name: string
+  firstName: string
+  lastName: string
   email: string
-  role: "Admin" | "Usuario"
-  profile: "Emprendedor" | "Abogado" | "Contador" | "Otro"
+  plan: "Básico" | "Intermedio" | "Avanzado"
+  profile: "Gerente" | "Abogado" | "Asistente"
 }
 
 interface AuthContextType {
@@ -19,34 +20,16 @@ interface AuthContextType {
 }
 
 interface RegisterData {
-  name: string
+  firstName: string
+  lastName: string
   email: string
   password: string
-  role: "Admin" | "Usuario"
-  profile: "Emprendedor" | "Abogado" | "Contador" | "Otro"
+  plan: "Básico" | "Intermedio" | "Avanzado"
+  profile: "Gerente" | "Abogado" | "Asistente"
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Usuarios simulados para el demo
-const mockUsers: (User & { password: string })[] = [
-  {
-    id: "1",
-    name: "Admin Principal",
-    email: "admin@aslegal.com",
-    password: "admin123",
-    role: "Admin",
-    profile: "Abogado",
-  },
-  {
-    id: "2",
-    name: "Juan Pérez",
-    email: "juan@example.com",
-    password: "user123",
-    role: "Usuario",
-    profile: "Emprendedor",
-  },
-]
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -79,10 +62,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Simular delay de API
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    const foundUser = mockUsers.find((u) => u.email === email && u.password === password)
+    //-----------------------------------------
+    const response = await fetch('http://localhost:8000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ "email": email, "password": password })
+    });
+    const data = await response.json();
 
-    if (foundUser) {
-      const { password: _, ...userWithoutPassword } = foundUser
+    if (data) {
+      const { password: _, ...userWithoutPassword } = data;
+      console.log("userWithoutPassword")
+      console.log(userWithoutPassword)
       setUser(userWithoutPassword)
       localStorage.setItem("aslegal_user", JSON.stringify(userWithoutPassword))
       setIsLoading(false)
@@ -95,33 +86,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (userData: RegisterData): Promise<boolean> => {
     setIsLoading(true)
-
     // Simular delay de API
     await new Promise((resolve) => setTimeout(resolve, 1000))
-
     // Verificar si el email ya existe
-    const existingUser = mockUsers.find((u) => u.email === userData.email)
-    if (existingUser) {
+    //const existingUser = mockUsers.find((u) => u.email === userData.email)
+    const response = await fetch('http://localhost:8000/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        "firstName": userData.firstName,
+        "lastName": userData.lastName,
+        "email": userData.email,
+        "password": userData.password,
+        "plan": userData.plan,
+        "profile": userData.profile
+      })
+    });
+    const data = await response.json();
+    console.log("Register.....")
+    console.log(data)
+    console.log("\n")
+    if (data) {
+      setUser(data)
+      localStorage.setItem("aslegal_user", JSON.stringify(data))
       setIsLoading(false)
-      return false
+      return true;
     }
-
-    // Crear nuevo usuario
-    const newUser: User = {
-      id: Date.now().toString(),
-      name: userData.name,
-      email: userData.email,
-      role: userData.role,
-      profile: userData.profile,
-    }
-
-    // Agregar a la lista de usuarios simulados
-    mockUsers.push({ ...newUser, password: userData.password })
-
-    setUser(newUser)
-    localStorage.setItem("aslegal_user", JSON.stringify(newUser))
-    setIsLoading(false)
-    return true
+    return false;
   }
 
   const logout = () => {
@@ -134,6 +125,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext)
+  console.log("context")
+  console.log(context)
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider")
   }
