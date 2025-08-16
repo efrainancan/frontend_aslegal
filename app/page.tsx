@@ -2,16 +2,93 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { validateRut } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Scale, FileText, Briefcase, CheckCircle, Star, ArrowRight, Shield, Clock, Zap, Award } from "lucide-react"
-
+import React, { useState } from "react";
 export default function HomePage() {
+  const [visibleId, setVisible] = useState(""); // false = oculto al inicio
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [rut, setRut] = useState("");
+  const [rutValido, setRutValido] = useState(true)
+  
+
+  const handleChangeEmail = (event:any) => setEmail(event.target.value)
+  const handleChangeFirstName = (event:any) => setFirstName(event.target.value)
+  const handleChangeLastName = (event:any) => setLastName(event.target.value)
+  const handleChangePhone = (event:any) => setPhone(event.target.value)
+  
+  
+  const createPay=async (plan:any)=>{
+    const valido=validateRut(rut)
+    setRutValido(valido);
+    if(valido==true){
+      
+      const response = await fetch("http://localhost:8000/api/pago/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: plan.name,
+          type: "AsLegal",
+          email: email,
+          plan: plan,
+          payer: {
+              email: email,
+              first_name: firstName,
+              last_name: lastName,
+              phone: {
+                area_code: "56",
+                number: phone
+              },
+              address: {
+                street_name: "Calle 123",
+                street_number: "123",
+                zip_code: "123456",
+                city: "Bogotá"
+              },
+              identification: {
+                type: "DNI",
+                number: rut
+              }
+          },
+          items:[{
+            id:"001",
+            title: "Producto de prueba",
+            description: "Descripción del producto #1 a pagar",
+            picture_url: "https://www.mercadopago.com/org-img/MP3/home/logomp3.gif",
+            category_id: "electronics",
+            quantity: 1,
+            currency_id: "CLP",
+            unit_price: 1000
+          }]
+        }),
+      });
+      const data = await response.json();
+      console.log("Respuesta:", data);
+        setTimeout(() => {
+          window.location.href = data.url;
+        }, 5000);
+    }
+    
+  }
+
+  
+  const handleChangeRut = (event:any) => {
+    setRut(event.target.value)
+    setRutValido(true)
+  }
+
   const plans = [
     {
-      name: "Básico",
-      price: "$29",
-      period: "/mes",
+      name: "Plan Básico",
+      price: "20.000",
+      period: "anual",
       description: "Perfecto para emprendedores y pequeños negocios",
       features: [
         "Hasta 10 casos por mes",
@@ -21,12 +98,12 @@ export default function HomePage() {
         "Almacenamiento 5GB",
       ],
       popular: false,
-      buttonText: "Comenzar Gratis",
+      buttonText: "Comenzar",
     },
     {
-      name: "Profesional",
-      price: "$79",
-      period: "/mes",
+      name: "Plan Profesional",
+      price: "50.000",
+      period: "mes",
       description: "Ideal para abogados y estudios jurídicos medianos",
       features: [
         "Casos ilimitados",
@@ -37,13 +114,13 @@ export default function HomePage() {
         "Integración con APIs",
         "Reportes avanzados",
       ],
-      popular: true,
-      buttonText: "Prueba 14 días gratis",
+      popular: false,
+      buttonText: "Comenzar",
     },
     {
-      name: "Empresarial",
-      price: "$199",
-      period: "/mes",
+      name: "Plan Empresarial",
+      price: "150.000",
+      period: "mes",
       description: "Para grandes firmas y corporaciones",
       features: [
         "Todo lo del plan Profesional",
@@ -107,6 +184,9 @@ export default function HomePage() {
     },
   ]
 
+  const toggleDiv = (name:string) => {
+    setVisible(visibleId===name ? "": name); // Cambia entre true y false
+  };
   return (
     <div className="min-h-screen bg-amity-dark">
       {/* Header/Navigation */}
@@ -151,8 +231,7 @@ export default function HomePage() {
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
             La Revolución Legal
             <span className="block gold-gradient-text">Está Aquí</span>
-          </h1>
-
+          </h1>        
           <p className="text-xl text-amity-text-muted mb-8 max-w-3xl mx-auto leading-relaxed">
             AsLegal transforma la práctica jurídica con IA avanzada. Genera documentos legales, gestiona casos y
             automatiza procesos en una plataforma integral diseñada para el futuro del derecho.
@@ -164,19 +243,11 @@ export default function HomePage() {
                 size="lg"
                 className="bg-gradient-to-r from-amity-gold to-amity-gold-light text-amity-dark font-bold px-8 py-4 rounded-xl shadow-2xl hover:shadow-amity-gold/30 transition-all duration-300 text-lg"
               >
-                Comenzar Gratis
+                Regístrese aquí
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/login">
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-2 border-amity-gold text-amity-gold hover:bg-amity-gold hover:text-amity-dark px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 bg-transparent"
-              >
-                Ver Demo
-              </Button>
-            </Link>
+            
           </div>
 
           {/* Stats */}
@@ -260,17 +331,25 @@ export default function HomePage() {
                     </Badge>
                   </div>
                 )}
-
+                
                 <CardHeader className="text-center pb-6">
-                  <CardTitle className="text-2xl font-bold text-white mb-2">{plan.name}</CardTitle>
+                  {visibleId !== plan.name && (
+                  <CardTitle className="text-2xl font-bold text-white mb-2">{plan.name}</CardTitle>)}
+                  {visibleId !== plan.name && (
                   <div className="mb-4">
-                    <span className="text-4xl font-bold text-amity-gold">{plan.price}</span>
-                    <span className="text-amity-text-muted">{plan.period}</span>
+                    
+                    <span className="text-4xl font-bold text-amity-gold">$ {plan.price}</span>
+                    <span className="text-amity-text-muted">/{plan.period}</span>
                   </div>
-                  <p className="text-amity-text-muted">{plan.description}</p>
-                </CardHeader>
+                  )}
+                  {visibleId !== plan.name && (<p className="text-amity-text-muted">{plan.description}</p>)}
 
+                </CardHeader>
+                
+
+                
                 <CardContent className="space-y-6">
+                  {visibleId !== plan.name && (
                   <ul className="space-y-3">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center gap-3">
@@ -279,9 +358,10 @@ export default function HomePage() {
                       </li>
                     ))}
                   </ul>
+                  )}
 
-                  <Link href="/register">
-                    <Button
+                    {visibleId !== plan.name && (
+                    <Button onClick={() => toggleDiv(plan.name) }
                       className={`w-full py-3 font-bold rounded-lg transition-all duration-300 ${
                         plan.popular
                           ? "bg-gradient-to-r from-amity-gold to-amity-gold-light text-amity-dark shadow-lg hover:shadow-xl"
@@ -290,7 +370,45 @@ export default function HomePage() {
                     >
                       {plan.buttonText}
                     </Button>
-                  </Link>
+                    )}
+                      {visibleId === plan.name && (
+                        <CardContent className="space-y-6">
+                          <p className="text-amity-text-muted">Datos de pago</p>
+                          
+                            <Input id="name" type="text" value={email} onChange={handleChangeEmail} placeholder="Correo electrónico"
+                            className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
+                          />
+                            <Input id="name" type="text" value={firstName} onChange={handleChangeFirstName} placeholder="Nombre"
+                            className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
+                          />
+                            <Input id="name" type="text" value={lastName} onChange={handleChangeLastName} placeholder="Apellido"
+                            className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
+                          />                          
+                            <Input id="name" type="text" value={phone} onChange={handleChangePhone} placeholder="Teléfono"
+                            className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
+                          />                          
+                            <Input id="name" type="text" value={rut} onChange={handleChangeRut} placeholder="RUT"
+                            className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
+                          />
+                          {!rutValido &&(
+                          <Label className="text-red-500">
+                            Ingrese un rut válido
+                          </Label>
+                          )}
+                                               
+                        <Button onClick={() => createPay(plan) }
+                          className={`w-full py-3 font-bold rounded-lg transition-all duration-300 ${
+                            plan.popular
+                              ? "bg-gradient-to-r from-amity-gold to-amity-gold-light text-amity-dark shadow-lg hover:shadow-xl"
+                              : "bg-amity-gray-light text-amity-text hover:bg-amity-gold hover:text-amity-dark"
+                          }`}
+                        >
+                          Pagar
+                        </Button>
+                      </CardContent>
+                      )}
+                      
+                  
                 </CardContent>
               </Card>
             ))}
@@ -348,7 +466,7 @@ export default function HomePage() {
                 size="lg"
                 className="bg-gradient-to-r from-amity-gold to-amity-gold-light text-amity-dark font-bold px-8 py-4 rounded-xl shadow-2xl hover:shadow-amity-gold/30 transition-all duration-300 text-lg"
               >
-                Comenzar Prueba Gratuita
+                Comenzar
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
