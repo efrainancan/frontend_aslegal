@@ -17,78 +17,123 @@ export default function HomePage() {
   const [phone, setPhone] = useState("");
   const [rut, setRut] = useState("");
   const [rutValido, setRutValido] = useState(true)
-  
+  const [errorEmail, setErrorEmail] = useState('');
+  const [errorFirstName, setErrorFirstName] = useState("");
+  const [errorLastName, setErrorLastName] = useState("");
 
-  const handleChangeEmail = (event:any) => setEmail(event.target.value)
-  const handleChangeFirstName = (event:any) => setFirstName(event.target.value)
-  const handleChangeLastName = (event:any) => setLastName(event.target.value)
-  const handleChangePhone = (event:any) => setPhone(event.target.value)
-  
-  
-  const createPay=async (plan:any)=>{
-    const valido=validateRut(rut)
+  const [isMonthly, setIsMonthly] = useState(false); // New state variable
+
+  const handleChangeEmail = (e: any) => {
+    const inputValue = e.target.value;
+    setEmail(inputValue);
+    if (inputValue === '') {
+      setErrorEmail('Campo requerido.');
+    } else if (!validateEmail(inputValue)) {
+      setErrorEmail('Por favor ingrese email válido.');
+    } else {
+      setErrorEmail('');
+    }
+  }
+  const handleChangeFirstName = (event: any) => {
+    setFirstName(event.target.value)
+    if (event.target.value == '') {
+      setErrorFirstName("Campo requerido.")
+    }
+    else if (!/^[A-Za-zÁÉÍÓÚÑáéíóúñ ]{2,40}$/.test(event.target.value)) {
+      setErrorFirstName("Nombre inválido (solo letras y 2–40 caracteres).");
+    }
+    else {
+      setErrorFirstName("");
+    }
+  }
+  const handleChangeLastName = (event: any) => {
+    setLastName(event.target.value)
+    if (event.target.value == '') {
+      setErrorLastName("Campo requerido.")
+    }
+    else if (!/^[A-Za-zÁÉÍÓÚÑáéíóúñ ]{2,40}$/.test(event.target.value)) {
+      setErrorLastName("Nombre inválido (solo letras y espacios).");
+    }
+    else {
+      setErrorLastName("");
+    }
+  }
+  const handleChangePhone = (event: any) => setPhone(event.target.value)
+
+
+  const createPay = async (plan: any) => {
+    const valido = validateRut(rut)
     setRutValido(valido);
-    if(valido==true){
-      
+    if (valido == true) {
+
       const response = await fetch("http://localhost:8000/api/pago/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: plan.name,
-          type: "AsLegal",
+          application:"AsLegal",
+          type: plan.period,
           email: email,
           plan: plan,
           payer: {
-              email: email,
-              first_name: firstName,
-              last_name: lastName,
-              phone: {
-                area_code: "56",
-                number: phone
-              },
-              address: {
-                street_name: "Calle 123",
-                street_number: "123",
-                zip_code: "123456",
-                city: "Bogotá"
-              },
-              identification: {
-                type: "DNI",
-                number: rut
-              }
+            email: email,
+            first_name: firstName,
+            last_name: lastName,
+            phone: {
+              area_code: "56",
+              number: phone
+            },
+            address: {
+              street_name: "",
+              street_number: "",
+              zip_code: "",
+              city: ""
+            },
+            identification: {
+              type: "DNI",
+              number: rut
+            }
           },
-          items:[{
-            id:"001",
-            title: "Producto de prueba",
-            description: "Descripción del producto #1 a pagar",
+          items: [{
+            id: plan.id,
+            title: plan.name,
+            description: plan.description,
             picture_url: "https://www.mercadopago.com/org-img/MP3/home/logomp3.gif",
-            category_id: "electronics",
+            category_id: "services",
             quantity: 1,
             currency_id: "CLP",
-            unit_price: 1000
+            unit_price: parseInt(plan.price.replaceAll(".",""))
           }]
         }),
       });
       const data = await response.json();
       console.log("Respuesta:", data);
-        setTimeout(() => {
-          window.location.href = data.url;
-        }, 5000);
+      setTimeout(() => {
+        window.location.href = data.url;
+      }, 1000);
     }
-    
+
   }
 
-  
-  const handleChangeRut = (event:any) => {
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
+    return emailRegex.test(email);
+  };
+  const handleChangeRut = (event: any) => {
+    if (event.target.value == '') {
+      setRutValido(false)
+    }
     setRut(event.target.value)
-    setRutValido(true)
+    const valido = validateRut(event.target.value)
+    setRutValido(valido);
   }
 
   const plans = [
     {
+      id:"001",
       name: "Plan Básico",
-      price: "20.000",
-      period: "anual",
+      price: isMonthly ? "25.000": "240.000",
+      period: isMonthly ? "mensual":"anual",
       description: "Perfecto para emprendedores y pequeños negocios",
       features: [
         "Hasta 10 casos por mes",
@@ -99,11 +144,13 @@ export default function HomePage() {
       ],
       popular: false,
       buttonText: "Comenzar",
+      enabled:true
     },
     {
+      id:"002",
       name: "Plan Profesional",
-      price: "50.000",
-      period: "mes",
+      price: isMonthly ? "35.000":"360.000",
+      period: isMonthly ? "mensual":"anual",
       description: "Ideal para abogados y estudios jurídicos medianos",
       features: [
         "Casos ilimitados",
@@ -116,10 +163,12 @@ export default function HomePage() {
       ],
       popular: false,
       buttonText: "Comenzar",
+      enabled:false
     },
     {
+      id:"003",
       name: "Plan Empresarial",
-      price: "150.000",
+      price: isMonthly ? "60.000":"600.000",
       period: "mes",
       description: "Para grandes firmas y corporaciones",
       features: [
@@ -134,6 +183,7 @@ export default function HomePage() {
       ],
       popular: false,
       buttonText: "Contactar Ventas",
+      enabled:false
     },
   ]
 
@@ -184,9 +234,18 @@ export default function HomePage() {
     },
   ]
 
-  const toggleDiv = (name:string) => {
-    setVisible(visibleId===name ? "": name); // Cambia entre true y false
+  const toggleDiv = (name: string) => {
+    if(name=="Plan Empresarial" || name=="Plan Profesional"){
+      alert("En construcción")
+    }
+    else{
+      setVisible(visibleId === name ? "" : name); // Cambia entre true y false
+    }
+    
   };
+
+  const isFormValid = true //email !== "" && firstName !== "" && lastName !== "" && phone !== "" && rut !== "" && errorEmail === "" && errorFirstName === "" && errorLastName === "" && rutValido !== false;
+
   return (
     <div className="min-h-screen bg-amity-dark">
       {/* Header/Navigation */}
@@ -231,7 +290,7 @@ export default function HomePage() {
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
             La Revolución Legal
             <span className="block gold-gradient-text">Está Aquí</span>
-          </h1>        
+          </h1>
           <p className="text-xl text-amity-text-muted mb-8 max-w-3xl mx-auto leading-relaxed">
             AsLegal transforma la práctica jurídica con IA avanzada. Genera documentos legales, gestiona casos y
             automatiza procesos en una plataforma integral diseñada para el futuro del derecho.
@@ -247,7 +306,7 @@ export default function HomePage() {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            
+
           </div>
 
           {/* Stats */}
@@ -311,17 +370,32 @@ export default function HomePage() {
             <p className="text-xl text-amity-text-muted max-w-3xl mx-auto">
               Desde emprendedores hasta grandes corporaciones, tenemos el plan perfecto para ti
             </p>
+            {/* Monthly/Annual Toggle Buttons */}
+            <div className="flex justify-center mb-3 mt-5">
+              <Button
+                onClick={() => setIsMonthly(true)}
+                className={`ml-3 px-6 py-2 rounded-l-lg transition-colors duration-200 ${isMonthly ? "bg-amity-gold text-amity-dark font-bold" : "bg-amity-gray-light text-amity-text"
+                  }`}
+              >
+                Mensual
+              </Button>
+              <Button
+                onClick={() => setIsMonthly(false)}
+                className={`ml-3 px-6 py-2 rounded-r-lg transition-colors duration-200 ${!isMonthly ? "bg-amity-gold text-amity-dark font-bold" : "bg-amity-gray-light text-amity-text"
+                  }`}
+              >
+                Anual
+              </Button>
+            </div>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {plans.map((plan, index) => (
               <Card
                 key={index}
-                className={`professional-card relative ${
-                  plan.popular
+                className={`professional-card relative ${plan.popular
                     ? "border-2 border-amity-gold shadow-2xl shadow-amity-gold/20 scale-105"
                     : "border border-amity-gray-light/20"
-                } bg-amity-gray/50 hover:bg-amity-gray/70 transition-all duration-300`}
+                  } bg-amity-gray/50 hover:bg-amity-gray/70 transition-all duration-300`}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -331,84 +405,84 @@ export default function HomePage() {
                     </Badge>
                   </div>
                 )}
-                
+
                 <CardHeader className="text-center pb-6">
                   {visibleId !== plan.name && (
-                  <CardTitle className="text-2xl font-bold text-white mb-2">{plan.name}</CardTitle>)}
+                    <CardTitle className="text-2xl font-bold text-white mb-2">{plan.name}</CardTitle>)}
                   {visibleId !== plan.name && (
-                  <div className="mb-4">
-                    
-                    <span className="text-4xl font-bold text-amity-gold">$ {plan.price}</span>
-                    <span className="text-amity-text-muted">/{plan.period}</span>
-                  </div>
+                    <div className="mb-4">
+
+                      <span className="text-4xl font-bold text-amity-gold">$ {plan.price}</span>
+                      <span className="text-amity-text-muted">/{plan.period} </span>
+                    </div>
                   )}
                   {visibleId !== plan.name && (<p className="text-amity-text-muted">{plan.description}</p>)}
 
                 </CardHeader>
-                
 
-                
                 <CardContent className="space-y-6">
                   {visibleId !== plan.name && (
-                  <ul className="space-y-3">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center gap-3">
-                        <CheckCircle className="h-5 w-5 text-amity-gold flex-shrink-0" />
-                        <span className="text-amity-text">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                    <ul className="space-y-3">
+                      {plan.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-center gap-3">
+                          <CheckCircle className="h-5 w-5 text-amity-gold flex-shrink-0" />
+                          <span className="text-amity-text">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
                   )}
 
-                    {visibleId !== plan.name && (
-                    <Button onClick={() => toggleDiv(plan.name) }
-                      className={`w-full py-3 font-bold rounded-lg transition-all duration-300 ${
-                        plan.popular
+                  {visibleId !== plan.name && (
+                    <Button onClick={() => toggleDiv(plan.name)}
+                      className={`w-full py-3 font-bold rounded-lg transition-all duration-300 ${plan.popular
                           ? "bg-gradient-to-r from-amity-gold to-amity-gold-light text-amity-dark shadow-lg hover:shadow-xl"
                           : "bg-amity-gray-light text-amity-text hover:bg-amity-gold hover:text-amity-dark"
-                      }`}
+                        }`}
                     >
                       {plan.buttonText}
                     </Button>
-                    )}
-                      {visibleId === plan.name && (
-                        <CardContent className="space-y-6">
-                          <p className="text-amity-text-muted">Datos de pago</p>
-                          
-                            <Input id="name" type="text" value={email} onChange={handleChangeEmail} placeholder="Correo electrónico"
-                            className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
-                          />
-                            <Input id="name" type="text" value={firstName} onChange={handleChangeFirstName} placeholder="Nombre"
-                            className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
-                          />
-                            <Input id="name" type="text" value={lastName} onChange={handleChangeLastName} placeholder="Apellido"
-                            className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
-                          />                          
-                            <Input id="name" type="text" value={phone} onChange={handleChangePhone} placeholder="Teléfono"
-                            className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
-                          />                          
-                            <Input id="name" type="text" value={rut} onChange={handleChangeRut} placeholder="RUT"
-                            className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
-                          />
-                          {!rutValido &&(
-                          <Label className="text-red-500">
-                            Ingrese un rut válido
-                          </Label>
-                          )}
-                                               
-                        <Button onClick={() => createPay(plan) }
-                          className={`w-full py-3 font-bold rounded-lg transition-all duration-300 ${
-                            plan.popular
-                              ? "bg-gradient-to-r from-amity-gold to-amity-gold-light text-amity-dark shadow-lg hover:shadow-xl"
-                              : "bg-amity-gray-light text-amity-text hover:bg-amity-gold hover:text-amity-dark"
-                          }`}
-                        >
-                          Pagar
-                        </Button>
-                      </CardContent>
+                  )}
+                  {visibleId === plan.name && (
+                    <CardContent className="space-y-6">
+                      <p className="text-amity-text-muted">Datos de pago</p>
+
+                      <Input id="name" type="email" value={email} onChange={handleChangeEmail} placeholder="Correo electrónico"
+                        className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
+                      />
+                      {errorEmail !== '' && <Label className="text-red-500">{errorEmail}</Label>}
+                      <Input id="name" type="text" value={firstName} onChange={handleChangeFirstName} placeholder="Nombre"
+                        className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
+                      />
+                      {errorFirstName !== '' && <Label className="text-red-500">{errorFirstName}</Label>}
+                      <Input id="name" type="text" value={lastName} onChange={handleChangeLastName} placeholder="Apellido"
+                        className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
+                      />
+                      {errorLastName !== '' && <Label className="text-red-500">{errorLastName}</Label>}
+                      <Input id="name" type="number" value={phone} onChange={handleChangePhone} placeholder="Teléfono"
+                        className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
+                      />
+                      <Input id="name" type="text" value={rut} onChange={handleChangeRut} placeholder="RUT"
+                        className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
+                      />
+                      {!rutValido && (
+                        <Label className="text-red-500">
+                          Ingrese un rut válido
+                        </Label>
                       )}
-                      
-                  
+
+                      <Button onClick={() => createPay(plan)}
+                        disabled={!isFormValid}
+                        className={`w-full py-3 font-bold rounded-lg transition-all duration-300 ${isFormValid
+                            ? "bg-gradient-to-r from-amity-gold to-amity-gold-light text-amity-dark shadow-lg hover:shadow-xl"
+                            : "bg-amity-gray-light text-amity-text hover:bg-amity-gold hover:text-amity-dark"
+                          }`}
+                      >
+                        Pagar
+                      </Button>
+                    </CardContent>
+                  )}
+
+
                 </CardContent>
               </Card>
             ))}

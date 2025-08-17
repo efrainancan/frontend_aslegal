@@ -7,8 +7,7 @@ interface User {
   firstName: string
   lastName: string
   email: string
-  plan: "Básico" | "Intermedio" | "Avanzado"
-  profile: "Gerente" | "Abogado" | "Asistente"
+  profile: "Seleccione su perfil" | "Gerente" | "Abogado" | "Asistente"
 }
 
 interface AuthContextType {
@@ -23,9 +22,8 @@ interface RegisterData {
   firstName: string
   lastName: string
   email: string
-  password: string
-  plan: "Básico" | "Intermedio" | "Avanzado"
-  profile: "Gerente" | "Abogado" | "Asistente"
+  password: string  
+  profile: "Seleccione su perfil" | "Gerente" | "Abogado" | "Asistente"
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -98,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         "lastName": userData.lastName,
         "email": userData.email,
         "password": userData.password,
-        "plan": userData.plan,
+        
         "profile": userData.profile
       })
     });

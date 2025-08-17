@@ -14,7 +14,7 @@ import { Scale, Eye, EyeOff } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 
 const PLANES = ["Básico", "Intermedio", "Avanzado"] as const
-const PROFILES = ["Gerente", "Abogado", "Asistente"] as const
+const PROFILES = ["Seleccione su perfil","Gerente", "Abogado", "Asistente"] as const
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -23,26 +23,28 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
-    plan: "Intermedio" as (typeof PLANES)[number],
-    profile: "Abogado" as (typeof PROFILES)[number],
+    profile: "Seleccione su perfil" as (typeof PROFILES)[number],
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState("")
   const { register, isLoading } = useAuth()
   const router = useRouter()
+  
 
   const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    console.log("validate")
+    
   }
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
     // Validaciones
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword ||
-        !formData.plan || !formData.profile
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword || !formData.profile
     ) {
       setError("Por favor, completa todos los campos")
       return
@@ -62,12 +64,9 @@ export default function RegisterPage() {
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
-      password: formData.password,
-      plan: formData.plan,
+      password: formData.password,      
       profile: formData.profile,
-    })
-    console.log("success")
-    console.log(success)
+    })    
 
     if (success) {
       router.push("/dashboard") // Cambiar de "/" a "/dashboard"
@@ -92,9 +91,7 @@ export default function RegisterPage() {
         <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-amity-text font-medium">
-                Nombre
-              </Label>
+              
               <Input
                 id="name"
                 type="text"
@@ -106,9 +103,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lastname" className="text-amity-text font-medium">
-                Apellido
-              </Label>
+              
               <Input
                 id="lastname"
                 type="text"
@@ -121,69 +116,49 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-amity-text font-medium">
-                Correo Electrónico
-              </Label>
+              
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleChange("email", e.target.value)}
-                placeholder="tu@email.com"
+                placeholder="email@dominio.com"
                 className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold"
                 disabled={isLoading}
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="plan" className="text-amity-text font-medium">
-                  Plan
-                </Label>
-                <Select value={formData.plan} onValueChange={(value) => handleChange("plan", value)}>
-                  <SelectTrigger className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text focus:ring-amity-gold">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-amity-gray border border-amity-gray-light/50 text-amity-text">
-                    {PLANES.map((plan) => (
-                      <SelectItem key={plan} value={plan} className="hover:bg-amity-gold/20">
-                        {plan}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="profile" className="text-amity-text font-medium">
-                  Perfil
-                </Label>
+              
                 <Select value={formData.profile} onValueChange={(value) => handleChange("profile", value)}>
                   <SelectTrigger className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text focus:ring-amity-gold">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-amity-gray border border-amity-gray-light/50 text-amity-text">
-                    {PROFILES.map((profile) => (
-                      <SelectItem key={profile} value={profile} className="hover:bg-amity-gold/20">
+                    {PROFILES.map((profile, index) => (
+                      <SelectItem
+                        key={profile}
+                        value={profile}
+                        className="hover:bg-amity-gold/20"
+                        disabled={index === 0} // <-- Bloquea la primera opción
+                      >
                         {profile}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+
               </div>
-            </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-amity-text font-medium">
-                Contraseña
-              </Label>
+              
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={(e) => handleChange("password", e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="CONTRASEÑA: Mínimo 6 caracteres"
                   className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold pr-10"
                   disabled={isLoading}
                 />
@@ -200,16 +175,14 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-amity-text font-medium">
-                Confirmar Contraseña
-              </Label>
+              
               <div className="relative">
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   value={formData.confirmPassword}
                   onChange={(e) => handleChange("confirmPassword", e.target.value)}
-                  placeholder="Repite tu contraseña"
+                  placeholder="Confirmar CONTRASEÑA"
                   className="bg-amity-gray-light border border-amity-gray-light/50 text-amity-text placeholder:text-amity-text-muted focus-visible:ring-amity-gold pr-10"
                   disabled={isLoading}
                 />
